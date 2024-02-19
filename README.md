@@ -9,7 +9,7 @@ wget https://github.com/GodOfAvacyn/gdshader-lsp/releases/download/v0.1/gdshader
 ```
 Alternatively, you can download the source code and build it yourself. This project was done in Rust, so you will need a variant of Cargo installed to use it.
 
-There is currently very few ways to actually use this language server without additional work. I am in the process of writing a VsCode client extension for the server, and am trying to contact the maintainers of [lspconfig](www.youtube.com) for better Neovim support. For now, here is how to manually add the languag server to Neovim:
+There is currently very few ways to actually use this language server without additional work. I am in the process of writing a VsCode client extension for the server, and am trying to contact the maintainers of [lspconfig](https://github.com/neovim/nvim-lspconfig) for better Neovim support. For now, here is how to manually add the languag server to Neovim:
 1. create a custom lua function somewhere in your neovim configuration:
    ```
     function gdshader()
