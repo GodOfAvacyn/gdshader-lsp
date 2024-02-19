@@ -28,9 +28,8 @@ There is currently very few ways to actually use this language server without ad
 
 ## Features
 ---
-Gdshader-lsp currently has support for code completion, hover hints, and error messages. It lacks support for some key features - notably, any support for preprocessor macros (which, in its current form, this will probably be a deal-breaker for many people). Here is a full list of coming features that, in my opinion, would make it usable:
+Gdshader-lsp currently has support for code completion, hover hints, error messages, and include statements. It lacks support for some key features - notably, support for preprocessor macros (which, in its current form, this will probably be a deal-breaker for many people). Here is a full list of coming features that, in my opinion, would make it usable:
 * Jump to definitioin
 * Preprocessor macro support
-* #include macros for .gdshaderinc files
 * An actual Vscode extetnsion
 * A spot among the supported lspconfig servers for Neovim.
