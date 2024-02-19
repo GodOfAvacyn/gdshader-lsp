@@ -14,7 +14,14 @@ pub enum TopLevelNode {
     Varying(VaryingNode),
     Uniform(UniformNode),
     Struct(StructNode),
-    Function(FunctionNode)
+    Function(FunctionNode),
+    Include(IncludeNode)
+}
+
+#[derive(Clone, Debug)]
+pub struct IncludeNode{
+    pub keyword: Token,
+    pub path: Token,
 }
 
 #[derive(Clone, Debug)]

@@ -97,8 +97,6 @@ fn eval_assignment_expr(
     } else {
         let correct_type = if assignment.op.kind == TokenKind::Equal {
             if left.type_info != right.type_info {
-                eprintln!("{:?}", left.type_info);
-                eprintln!("{:?}", right.type_info);
                 return type_mismatch();
             } else {
                 left.type_info.clone()

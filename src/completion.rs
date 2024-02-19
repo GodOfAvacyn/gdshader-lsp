@@ -29,6 +29,7 @@ fn cast_types() -> Vec<String> {
 #[derive(Debug)]
 pub enum CompletionElement {
     TopLevelKeyword,
+    Include,
     ShaderType,
     RenderMode,
     Uniform,
@@ -238,6 +239,7 @@ pub fn get_completion_items(
                 .collect()
         }
         CompletionElement::None => vec![],
+        CompletionElement::Include => vec![]
     }
 }
 
@@ -253,7 +255,7 @@ pub fn get_hover_description(
             value: format!("{}\n\n{}", text.clone(), info.description)
         }))
     } else if let Some(variable) = memory.scopes.collect_scopes_from(scope)
-        .iter().find_map(|x| { x.get(text) }) {
+        .iter().find_map(|x| x.get(text)) {
         let description = variable.description.clone();
         let description = description.map_or("".to_string(), |x| format!("\n\n{}", x));
         Some(HoverContents::Markup(MarkupContent {

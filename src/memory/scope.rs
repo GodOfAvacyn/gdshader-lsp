@@ -23,7 +23,7 @@ pub struct Scope {
     pub scope_type: ScopeType,
     pub parent: usize,
     pub range: Range,
-    values: HashMap<String, ValueInfo>
+    pub values: HashMap<String, ValueInfo>
 } 
 
 pub struct ScopeList {
@@ -118,12 +118,15 @@ impl ScopeList {
     }
 
     pub fn find_scope_from_position(&self, position: Position) -> usize {
-        self.scopes.iter().enumerate().find_map(|(i,scope)| {
-            if scope.range.contains_position(position) {
-                Some(i)
-            } else { None }
-        }).map_or(0, |x| x)
-
+        self.scopes
+            .iter()
+            .enumerate()
+            .filter_map(|(i,scope)| {
+                if scope.range.contains_position(position) { Some(i) }
+                else { None }
+            })
+            .max()
+            .map_or(0, |x| x)
     }
     
     pub fn collect_scopes_from(
@@ -141,8 +144,13 @@ impl ScopeList {
                 break;
             }
         };
-        self.scopes.iter().enumerate().filter_map(move |(idx, scope)| {
-            if indices.contains(&idx) { Some(&scope.values) } else { None }
-        }).collect()
+        let scopes: Vec<&HashMap<String, ValueInfo>> = self.scopes
+            .iter()
+            .enumerate()
+            .filter_map(move |(idx, scope)| {
+                if indices.contains(&idx) { Some(&scope.values) } else { None }
+            }).collect();
+        
+        scopes
     }
 }

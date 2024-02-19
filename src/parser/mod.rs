@@ -82,7 +82,7 @@ pub fn parse_number(stream: &mut TokenStream) -> Result<Token, TokenError> {
 }
 
 pub fn parse_positive_int(stream: &mut TokenStream) -> Option<u32> {
-    let lines = stream.get_source().get_lines();
+    let lines = stream.get_source().get_code();
     if stream.current().is_err() { return None }
 
     let current = stream.current().unwrap();
@@ -126,7 +126,7 @@ pub fn parse_type(stream: &mut TokenStream) -> Result<TypeNode, TokenError> {
         id.range.start,
         size_range.map_or(id.range.end, |x| x.end)
     );
-    let base = id.text(stream.get_source().get_lines());
+    let base = id.text(stream.get_source().get_code());
     Ok(TypeNode { info: TypeInfo {base, size}, range })
 
 }

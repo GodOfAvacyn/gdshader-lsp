@@ -4,7 +4,8 @@ use lsp_types::{Position, TextDocumentContentChangeEvent};
 use memory::Memory;
 use nodes::TopLevelNode;
 use parser::parse_top_level;
-use std::panic;
+use std::path::Path;
+use std::fs;
 
 pub mod lexer;
 pub mod source_code;
@@ -82,7 +83,6 @@ pub fn calculate_new_end_position(start: Position, new_text: &str) -> Position {
         character: new_end_character,
     }
 }
-
 
 pub const DID_OPEN: &'static str = "textDocument/didOpen";
 pub const DID_CHANGE: &'static str = "textDocument/didChange";

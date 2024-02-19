@@ -38,13 +38,13 @@ pub struct FunctionParam {
     pub qualifier: Option<FunctionParamQualifier>
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct FunctionSignature {
     pub return_type: TypeInfo,
     pub params: Vec<FunctionParam>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct FunctionInfo {
     pub signatures: Vec<FunctionSignature>,
     pub range: Option<Range>,

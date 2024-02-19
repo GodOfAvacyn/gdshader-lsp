@@ -1,5 +1,5 @@
 use logos::{Logos, Lexer};
-use lsp_types::{Diagnostic, Position, Range};
+use lsp_types::{Position, Range};
 use crate::{completion::CompletionElement, source_code::SourceDocument};
 use super::{ExtraRange, Token, TokenKind};
 
@@ -159,7 +159,7 @@ impl TokenStream {
         if let Some(cursor) = self.cursor {
             for token in &self.tokens {
                 if token.range.contains_position(cursor) {
-                    return Some(token.text(self.source.get_lines()))
+                    return Some(token.text(&self.source.get_code()))
                 }
             }
         }

@@ -1,4 +1,4 @@
-use crate::lexer::{Token, TokenKind, TokenStream};
+use crate::lexer::{Token, TokenKind};
 use TokenKind::*;
 
 pub enum OperationType {

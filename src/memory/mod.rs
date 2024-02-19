@@ -1,4 +1,4 @@
-use std::{any::Any, collections::{HashMap, HashSet}};
+use std::collections::HashMap;
 use lsp_types::*;
 
 mod types;
@@ -14,30 +14,42 @@ pub use scope::*;
 pub use hint::*;
 pub use render_modes::*;
 
-use crate::{interpreter::EvaluateError, lexer::Token, source_code::SourceDocument};
+use crate::{get_byte_offset_from_position, interpreter::{evaluate_top_level_node, EvaluateError}, lexer::{Token, TokenStream}, nodes::TopLevelNode, parse_tokens, source_code::SourceDocument};
 
 pub struct Memory {
+    pub root_dir: Option<String>,
+    pub valid_shader_includes: Vec<String>,
     pub shader_type: ShaderType,
     pub valid_render_modes: HashMap<String, String>,
-    /// 'true' means 'this can be used inside functions'.;
     pub builtin_types: HashMap<String, BuiltinTypeInfo>,
     pub functions: HashMap<String, FunctionInfo>,
     pub hints: HashMap<String, HintInfo>,
     pub structs: HashMap<String, StructInfo>,
     pub scopes: ScopeList,
+
     source: SourceDocument
 }
 impl Memory {
-    pub fn new(source_str: &str) -> Self {
+    pub fn new(source_str: &str, root_dir: Option<String>) -> Self {
         let source = SourceDocument::new(source_str);
         let mut scopes = ScopeList::new();
-        scopes.extend(variable_builtins());
+        if root_dir.is_some() {
+            scopes.extend(variable_builtins());
+        }
+        let (functions, hints) = if root_dir.is_none() {
+            (HashMap::new(), HashMap::new())
+        } else {
+            (make_builtin_functions(), make_builtin_hints())
+        };
+        
         Memory {
+            root_dir,
+            valid_shader_includes: vec![],
             shader_type: ShaderType::Spatial,
             valid_render_modes: HashMap::new(),
             builtin_types: make_builtin_types(),
-            functions: make_builtin_functions(),
-            hints: make_builtin_hints(),
+            functions,
+            hints,
             structs: HashMap::new(),
             scopes,
             source
@@ -45,6 +57,7 @@ impl Memory {
     }
 
     pub fn get_builtin_types(&self, scope: usize) -> Vec<CompletionItem> {
+        eprintln!("I am apparently looking for a type");
         self.builtin_types
             .iter()
             .filter_map(|(name, info)| {
@@ -107,7 +120,6 @@ impl Memory {
     }
 
     pub fn get_variables(&self, scope: usize, is_const: bool) -> Vec<CompletionItem>{
-        eprintln!("you got variables at {}", scope);
         self.scopes.collect_scopes_from(scope)
             .iter()
             .flat_map(|x| x.iter())
@@ -136,7 +148,7 @@ impl Memory {
     }
 
     pub fn get_token_text(&self, token: Token) -> String {
-        token.text(self.source.get_lines())
+        token.text(self.source.get_code())
     }
 
     pub fn get_source(&self) -> &SourceDocument {
@@ -146,6 +158,45 @@ impl Memory {
     pub fn alert_error(&mut self, msg: &str, range: Range) -> EvaluateError {
         let message = format!("Syntax Error: {}", msg); 
         self.source.push_error(msg, range, EvaluateError::SemanticsError)
+    }
+
+    pub fn fetch_gdshaderinc_files(&self, root_path: &str) -> Vec<String> {
+        let mut result = Vec::new();
+
+        let walker = walkdir::WalkDir::new(root_path).into_iter();
+        for entry in walker.filter_map(|e| e.ok()) {
+            let path = entry.path();
+            if path.is_file() && path.extension().unwrap_or_default() == "gdshaderinc" {
+                if let Some(file_name) = path.file_name() {
+                    if let Some(file_name_str) = file_name.to_str() {
+                        result.push(file_name_str.to_string());
+                    }
+                }
+            }
+        }
+    
+        result
+    }
+
+    pub fn evaluate(&mut self, top_levels: Vec<TopLevelNode>) -> &Vec<Diagnostic> {
+        for top_level in top_levels {
+            _ = evaluate_top_level_node(top_level, self);
+        }
+
+        self.source.get_diagnostics()
+    }
+
+    pub fn evaluate_new(&mut self, cursor: Option<Position>) -> &Vec<Diagnostic> {
+        let mut stream = TokenStream::new(self.source.get_code(), cursor);
+        let tree = parse_tokens(&mut stream);
+
+        let mut diagnostics = stream.get_source().get_diagnostics().clone();
+        self.source.add_diagnostics(diagnostics);
+        self.evaluate(tree)
+    }
+
+    pub fn apply_change(&mut self, change: TextDocumentContentChangeEvent) {
+        self.source.apply_change(change);
     }
 }
 

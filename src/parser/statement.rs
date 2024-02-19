@@ -132,14 +132,20 @@ pub fn parse_for_statement(stream: &mut TokenStream) -> StatementResult {
     _ = parse_semicolon(stream);
     let update = Box::new(parse_expression(stream)?);
     parse_kind(stream, RightParen)?;
-    let action = Box::new(parse_statement(stream)?);
+    let mut action = parse_statement(stream)?;
+    action = if let StatementNode::Block(mut block) = action {
+        block.range.start = keyword.range.start; 
+        StatementNode::Block(block)
+    } else {
+        action
+    };
 
     Ok(StatementNode::For(ForNode {
         keyword,
         initializer,
         condition,
         update,
-        action
+        action: Box::new(action)
     }))
 
 }

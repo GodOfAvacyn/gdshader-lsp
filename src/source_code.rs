@@ -1,17 +1,16 @@
 use lsp_server::{Connection, Message, Notification};
 use lsp_types::*;
 
-use crate::lexer::{Token, TokenError, TokenKind};
+use crate::{get_byte_offset_from_position, lexer::{Token, TokenError, TokenKind}};
 
 pub struct SourceDocument {
-    lines: Vec<String>,
+    code: String,
     diagnostics: Vec<Diagnostic>
 }
 impl SourceDocument {
     pub fn new(source: &str) -> Self {
-        let lines = source.split("\n").map(|x| x.to_string()).collect();
         let diagnostics = vec![];
-        Self {lines, diagnostics}
+        Self {diagnostics, code: source.to_string() }
     }
 
     pub fn push_error<T>(&mut self, msg: &str, range: Range, error: T) -> T{
@@ -28,12 +27,27 @@ impl SourceDocument {
         self.diagnostics = diagnostics;
     }
 
-    pub fn get_lines(&self) -> &Vec<String> {
-        &self.lines
-    }
-
     pub fn get_diagnostics(&self) -> &Vec<Diagnostic> {
         &self.diagnostics
+    }
+
+    pub fn get_code(&self) -> &String {
+        &self.code
+    }
+
+    pub fn add_diagnostics(&mut self, diagnostics: Vec<Diagnostic>) {
+        self.diagnostics.extend(diagnostics)
+    }
+
+    pub fn apply_change(&mut self, change: TextDocumentContentChangeEvent) {
+        if let Some(range) = change.range {
+            let start_byte = get_byte_offset_from_position(&self.code, range.start);
+            let end_byte = get_byte_offset_from_position(&self.code, range.end);
+            let new_text = &change.text;
+            if start_byte <= self.code.len() && end_byte <= self.code.len() && start_byte <= end_byte {
+                self.code.replace_range(start_byte..end_byte, new_text);
+            }
+        }
     }
 }
 

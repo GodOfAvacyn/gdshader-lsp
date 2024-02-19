@@ -15,8 +15,8 @@ impl Token {
         self.kind.as_ref()
     } 
 
-    pub fn text(&self, source: &Vec<String>) -> String {
-        let line = &source.get(self.range.start.line as usize);
+    pub fn text(&self, source: &String) -> String {
+        let line = &source.lines().nth(self.range.start.line as usize);
         if let Some(line) = line {
             let start = self.range.start.character as usize;
             let end = self.range.end.character as usize;
@@ -38,12 +38,23 @@ impl ExtraRange for Range {
         if position.line > self.start.line &&
             position.line < self.end.line { return true }
     
-        if position.line == self.start.line {
-            position.character >= self.start.character &&
-            position.character <= self.end.character
-        } else {
-            false
+        let after_start = position.character >= self.start.character;
+        let before_end = position.character <= self.end.character;
+        let on_start_line = position.line == self.start.line;
+        let on_end_line = position.line == self.end.line;
+        
+        if on_start_line && on_end_line  {
+            return after_start && before_end
         }
+
+        if on_start_line {
+            return after_start;
+        }
+        if on_end_line {
+            return before_end;
+        }
+
+        false
     }
 
     fn preceeds_position(&self, position: Position) -> bool {
@@ -57,6 +68,8 @@ impl ExtraRange for Range {
 #[derive(AsRefStr, Copy, Clone, Debug, Eq, Logos, PartialEq)]
 #[logos(extras=Vec<usize>, skip r"[ \t\f]+")]
 pub enum TokenKind {
+    // Preprocessors
+    #[token("#include")] Include,
     // Top Level Keywords
     #[token("shader_type")] ShaderType,
     #[token("render_mode")] RenderMode,

@@ -1,5 +1,3 @@
-use serde_json::map::Keys;
-
 use crate::memory::TypeInfo;
 use super::*;
 
@@ -19,6 +17,7 @@ pub fn parse_top_level(
             Struct => parse_struct(stream),
             Void => parse_function(stream),
             Identifier => parse_function(stream),
+            Include => parse_include(stream),
             Semicolon => {
                 stream.advance();
                 Err(TokenError::SyntaxError)
@@ -226,7 +225,7 @@ pub fn parse_function(stream: &mut TokenStream) -> TopLevelResult {
     let type_node = match parse_conditional(stream, Void) {
         Some(x) => {
             is_void = true;
-            let text = x.text(stream.get_source().get_lines());
+            let text = x.text(stream.get_source().get_code());
             TypeNode { info: TypeInfo::from_str(&text), range: x.range}
         }
         None => parse_type(stream)?,
@@ -258,6 +257,18 @@ pub fn parse_function(stream: &mut TokenStream) -> TopLevelResult {
         identifier,
         params,
         block
+    }))
+}
+
+pub fn parse_include(stream: &mut TokenStream) -> TopLevelResult {
+    let keyword = stream.consume()?;
+
+    stream.set_cursor_element(CompletionElement::Include);
+    let path = parse_kind(stream, String)?;
+
+    Ok(TopLevelNode::Include(IncludeNode{
+        keyword,
+        path
     }))
 }
 

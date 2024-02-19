@@ -1,6 +1,6 @@
-use std::{collections::HashSet, mem};
+use std::{collections::HashSet, fs, mem};
 
-use crate::{memory::*, nodes::*, parser::parse_int};
+use crate::{evaluate_tree, lexer::TokenStream, memory::*, nodes::*, parse_tokens, parser::parse_int};
 
 use super::*;
 
@@ -17,6 +17,7 @@ pub fn evaluate_top_level_node(
         TopLevelNode::Varying(x) => evaluate_varying(memory, x),
         TopLevelNode::Struct(x) => evaluate_struct(memory, x),
         TopLevelNode::Function(x) => evaluate_function(memory, x),
+        TopLevelNode::Include(x) => evaluate_include(memory, x),
     }
 }
 
@@ -257,3 +258,41 @@ pub fn evaluate_function(
     );
     Ok(())
 }
+
+fn evaluate_include(memory: &mut Memory, node: IncludeNode) -> Result<(), EvaluateError> {
+    let root = if let Some(root) = memory.root_dir.clone() {
+        root
+    } else {
+        return Ok(());
+    };
+    let include_path = memory.get_token_text(node.path)
+        .replace("res://", &root)
+        .trim_matches(|x| x == '"').to_string();
+
+    let include_text = if let Ok(text) = fs::read_to_string(include_path.clone()) {
+        text
+    } else {
+        let message = "invalid shader include directory";
+        return Err(memory.alert_error(message, node.path.range));
+    };
+    
+    let mut include_stream = TokenStream::new(&include_text, None);
+    let mut include_memory = Memory::new(&include_text, None);
+    let include_tree = parse_tokens(&mut include_stream);
+    evaluate_tree(&mut include_memory, include_tree);
+
+    for (key, value) in &include_memory.scopes.scopes[0].values {
+        memory.scopes.insert(key.clone(), value.clone());
+    }
+    for (key, value) in &include_memory.functions {
+        memory.functions.insert(key.clone(), value.clone());
+    }
+
+    Ok(())
+}
+
+
+
+
+
+
