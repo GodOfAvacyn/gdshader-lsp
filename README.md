@@ -1,6 +1,8 @@
 ## Introduction
 ---
 Gdshader-lsp ins a language server for the Godot Shading Language that runs independently from the Godot engine. This allows you to edit gdshader files in your editor of choice. It is still a work in progress, but most of the key features of an LSP is included, including helpful error messages, hover hints, and code completion.
+
+This was made at the same time as [tree-sitter-gdshader](https://github.com/GodOfAvacyn/tree-sitter-gdshader), which is used for syntax highlighting (also a WIP, but support for neovim is sort of there).
 ## Download Instructions
 ---
 To download the server, run the following command in a terminal:
