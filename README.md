@@ -24,7 +24,7 @@ There is currently very few ways to actually use this language server without ad
       }
     end
    ```
-2. When editing a .gdshader file, start the language server with ':lua gdshader()'
+2. When editing a .gdshader file, start the language server with ':lua gdshader()'. You'll need to call that function for each new gdshader file you open (but only once) (and until I can set up a real client for neovim).
 
 ## Features
 ---
