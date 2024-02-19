@@ -11,7 +11,7 @@ pub use statement::*;
 
 
 pub fn parse_kind(stream: &mut TokenStream, kind: TokenKind) -> TokenResult {
-    stream.set_cursor_element(CompletionElement::None);
+    stream.queue_cursor_element(CompletionElement::None);
     stream.consume_token_kind(kind)
 }
 
@@ -35,7 +35,7 @@ pub fn parse_primitive(stream: &mut TokenStream) -> Option<Token> {
 }
 
 pub fn parse_qualifier(stream: &mut TokenStream) -> Option<Token> {
-    stream.set_cursor_element(CompletionElement::FunctionQualifier);
+    stream.queue_cursor_element(CompletionElement::FunctionQualifier);
     stream.consume_if(|x| match x.kind {
         In | Out | InOut => {
             true
@@ -134,7 +134,7 @@ pub fn parse_type(stream: &mut TokenStream) -> Result<TypeNode, TokenError> {
 pub fn parse_value_specifier(stream: &mut TokenStream) -> Result<ValueNode, TokenError> {
     let mut type_node = parse_type(stream)?;
 
-    stream.set_cursor_element(CompletionElement::None);
+    stream.queue_cursor_element(CompletionElement::None);
     let identifier = parse_identifier(stream)?;
 
     let (other_size, other_size_range) = parse_size(stream)?;

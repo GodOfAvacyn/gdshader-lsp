@@ -4,8 +4,6 @@ use lsp_types::{Position, TextDocumentContentChangeEvent};
 use memory::Memory;
 use nodes::TopLevelNode;
 use parser::parse_top_level;
-use std::path::Path;
-use std::fs;
 
 pub mod lexer;
 pub mod source_code;

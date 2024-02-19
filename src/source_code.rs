@@ -1,7 +1,7 @@
 use lsp_server::{Connection, Message, Notification};
 use lsp_types::*;
 
-use crate::{get_byte_offset_from_position, lexer::{Token, TokenError, TokenKind}};
+use crate::{get_byte_offset_from_position, lexer::TokenError};
 
 pub struct SourceDocument {
     code: String,

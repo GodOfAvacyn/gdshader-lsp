@@ -2,7 +2,7 @@ use super::*;
 
 pub fn parse_block(stream: &mut TokenStream) -> StatementResult {
     let left = parse_kind(stream, LeftBrace)?;
-    stream.set_cursor_element(CompletionElement::Statement);
+    stream.queue_cursor_element(CompletionElement::Statement);
     let mut statements = vec![];
     loop {
         stream.parsing_statement = true;
@@ -24,7 +24,7 @@ pub fn parse_block(stream: &mut TokenStream) -> StatementResult {
 
 pub fn parse_statement(stream: &mut TokenStream) -> StatementResult {
     let current = stream.current()?;
-    stream.set_cursor_element(CompletionElement::Statement);
+    stream.queue_cursor_element(CompletionElement::Statement);
     stream.parsing_statement = true;
     match current.kind {
         Const => parse_var_declaration_statement(stream),
@@ -68,7 +68,7 @@ pub fn parse_var_declaration_statement(stream: &mut TokenStream) -> StatementRes
          .map_or((None, false), |x| (Some(x), true));
 
     if is_const {
-        stream.set_cursor_element(CompletionElement::Type);
+        stream.queue_cursor_element(CompletionElement::Type);
         stream.parsing_const = is_const;
     }
     let value = parse_value_specifier(stream);
@@ -170,7 +170,7 @@ pub fn parse_switch_statement(stream: &mut TokenStream) -> StatementResult {
 }
 
 pub fn parse_switch_case(stream: &mut TokenStream) -> Result<SwitchCaseNode, TokenError> {
-    stream.set_cursor_element(CompletionElement::SwitchCase);
+    stream.queue_cursor_element(CompletionElement::SwitchCase);
     let keyword = match parse_conditional(stream, Default) {
         Some(keyword) => keyword,
         None => {

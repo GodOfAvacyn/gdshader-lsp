@@ -1,3 +1,4 @@
 # Rust
 target/
 Cargo.lock
+**/node_modules

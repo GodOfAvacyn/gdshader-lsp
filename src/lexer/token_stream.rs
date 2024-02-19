@@ -13,10 +13,11 @@ pub type TokenResult = Result<Token, TokenError>;
 
 pub struct TokenStream {
     current_idx: usize,
-    tokens: Vec<Token>,
+    pub tokens: Vec<Token>,
     source: SourceDocument,
     cursor: Option<Position>,
     pub cursor_element: CompletionElement,
+    cursor_element_queue: CompletionElement,
     pub parsing_const: bool,
     pub parsing_statement: bool,
     record_errors: bool,
@@ -46,6 +47,7 @@ impl TokenStream {
             source,
             cursor,
             cursor_element: CompletionElement::TopLevelKeyword,
+            cursor_element_queue: CompletionElement::TopLevelKeyword,
             parsing_const: false,
             parsing_statement: false,
             record_errors: true,
@@ -83,23 +85,21 @@ impl TokenStream {
         self.current_idx = idx;
     }
 
-    pub fn set_cursor_element(
+    pub fn queue_cursor_element(
         &mut self,
         element: CompletionElement
     ) {
-        if self.current_idx == 0 {
-            return;
-        }
-        if let Some(cursor) = self.cursor {
-            if let Some(token) = self.tokens.get(self.current_idx-1) {
-                if token.range.preceeds_position(cursor) {
-                    self.cursor_element = element;
-                }
-            }
-        }
+        self.cursor_element_queue = element;
     }
 
     pub fn advance(&mut self) {
+        if let Some(cursor) = self.cursor {
+            if let Ok(current) = self.current() {
+                if current.range.contains_position(cursor) {
+                    self.cursor_element = self.cursor_element_queue.clone();
+                }
+            };
+        }
         self.current_idx += 1;
         self.parsing_statement = false;
     }

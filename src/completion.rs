@@ -26,10 +26,11 @@ fn cast_types() -> Vec<String> {
     ].map(|x| x.to_string()).to_vec()
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum CompletionElement {
     TopLevelKeyword,
     Include,
+    IncludeString,
     ShaderType,
     RenderMode,
     Uniform,
@@ -63,7 +64,8 @@ pub fn get_completion_items(
                 "instance",
                 "group_uniforms",
                 "struct",
-                "void"
+                "void",
+                "#include"
             ]
                 .iter()
                 .map(|x| CompletionItem {
@@ -239,7 +241,24 @@ pub fn get_completion_items(
                 .collect()
         }
         CompletionElement::None => vec![],
-        CompletionElement::Include => vec![]
+        CompletionElement::Include => {
+            vec![CompletionItem {
+                label: "#include".to_string(),
+                kind: Some(CompletionItemKind::KEYWORD),
+                ..Default::default()
+            }]
+        },
+        CompletionElement::IncludeString => {
+            let root = memory.root_dir.clone().map_or("".to_string(), |x| x);
+            memory.fetch_gdshaderinc_files(&root)
+                .iter()
+                .map(|x| CompletionItem {
+                    label: format!("\"{}\"",x.to_string()),
+                    kind: Some(CompletionItemKind::TEXT),
+                    ..Default::default()
+                })
+                .collect()
+        },
     }
 }
 
@@ -261,19 +280,19 @@ pub fn get_hover_description(
         Some(HoverContents::Markup(MarkupContent {
             kind: MarkupKind::Markdown,
             value: format!(
-                "`{}` {}{}",
+                "{} {}{}",
                 variable.ty.to_string(),
                 text,
                 description
-            ).replace("_", "\\_")
+            )
         }))
     } else if let Some(struct_info) = memory.structs.get(text) {
         let fields = struct_info.fields.iter().map(|x| {
-            format!("  `{}` {};", x.ty.to_string(), x.name)
+            format!("  {} {};", x.ty.to_string(), x.name)
         }).collect::<Vec<_>>().join("\n");
         Some(HoverContents::Markup(MarkupContent {
             kind: MarkupKind::Markdown,
-            value: format!("struct **{}** {{\n{}\n}}", text, fields).replace("_", "\\_")
+            value: format!("struct {} {{\n{}\n}}", text, fields)
         }))
     } else if let Some(function) = memory.functions.get(text) {
         let signatures = function.signatures.iter().map(|x| {
@@ -284,19 +303,19 @@ pub fn get_hover_description(
                     Some(FunctionParamQualifier::InOut) => "inout ",
                     None => ""
                 }.to_string();
-                format!("`{}{}` {}", qualifier, y.ty.to_string(), y.name)
+                format!("{}{} {}", qualifier, y.ty.to_string(), y.name)
             }).collect::<Vec<_>>().join(", ");
-            format!("`{}` **{}** ({})", x.return_type.to_string(), text, params)
+            format!("{} {} ({})", x.return_type.to_string(), text, params)
         }).collect::<Vec<_>>().join("\n");
         let description = function.description.clone().map_or("".to_string(), |x| x);
         Some(HoverContents::Markup(MarkupContent {
             kind: MarkupKind::Markdown,
-            value: format!("{}\n\n{}", signatures, description).replace("_", "\\_")
+            value: format!("{}\n\n{}", signatures, description)
         }))
     } else if let Some(hint) = memory.hints.get(text) {
         let types = hint.type_info
             .iter()
-            .map(|x| format!("`{}`", x.to_string()))
+            .map(|x| format!("{}", x.to_string()))
             .collect::<Vec<_>>()
             .join(",");
         let args = if hint.num_arguments.iter().any(|&x| x > 0){ "(...)" }
@@ -304,7 +323,7 @@ pub fn get_hover_description(
         let description = hint.description.clone();
         Some(HoverContents::Markup(MarkupContent {
             kind: MarkupKind::Markdown,
-            value: format!("({}) {}{}\n\n{}", types, text, args, description).replace("_", "\\_")
+            value: format!("({}) {}{}\n\n{}", types, text, args, description)
         }))
     } else {
         None

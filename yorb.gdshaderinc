@@ -1,4 +1,3 @@
-int x() {
-    return 2 + 5;
-    floor();
+void fragment() {
+    vec4 x();
 }

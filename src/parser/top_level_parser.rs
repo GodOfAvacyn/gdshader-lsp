@@ -4,6 +4,7 @@ use super::*;
 pub fn parse_top_level(
     stream: &mut TokenStream
 ) -> Result<Option<TopLevelNode>,TokenError> {
+    stream.queue_cursor_element(CompletionElement::TopLevelKeyword);
     if let Ok(token) = stream.current() {
         let result = match token.kind {
             ShaderType => parse_shader_type(stream),
@@ -43,7 +44,7 @@ pub fn parse_top_level(
 pub fn parse_shader_type(stream: &mut TokenStream) -> TopLevelResult {
     let keyword = stream.consume()?;
 
-    stream.set_cursor_element(CompletionElement::ShaderType);
+    stream.queue_cursor_element(CompletionElement::ShaderType);
     let shader_type = parse_identifier(stream)?;
 
     _ = parse_kind(stream, Semicolon);
@@ -55,15 +56,13 @@ pub fn parse_shader_type(stream: &mut TokenStream) -> TopLevelResult {
 
 pub fn parse_render_mode(stream: &mut TokenStream) -> TopLevelResult {
     let keyword = stream.consume()?;
+    stream.queue_cursor_element(CompletionElement::RenderMode);
     let render_modes = parse_list(
         stream,
         Comma,
         Semicolon,
         Trailing::None,
-        |s| {
-            s.set_cursor_element(CompletionElement::RenderMode);
-            parse_identifier(s) 
-        }
+        |s| parse_identifier(s)
     )?;
 
     _ = parse_kind(stream, Semicolon);
@@ -75,7 +74,7 @@ pub fn parse_render_mode(stream: &mut TokenStream) -> TopLevelResult {
 
 pub fn parse_group_uniforms(stream: &mut TokenStream) -> TopLevelResult {
     let keyword = stream.consume()?;
-    stream.set_cursor_element(CompletionElement::None);
+    stream.queue_cursor_element(CompletionElement::None);
     let group = parse_conditional(stream, Identifier);
     let subgroup = parse_conditional(stream, Dot)
         .map(|_| parse_identifier(stream))
@@ -92,9 +91,9 @@ pub fn parse_group_uniforms(stream: &mut TokenStream) -> TopLevelResult {
 pub fn parse_const(stream: &mut TokenStream) -> TopLevelResult {
     let keyword = stream.consume()?;
 
-    stream.set_cursor_element(CompletionElement::Precision);
+    stream.queue_cursor_element(CompletionElement::Precision);
     let precision = parse_conditional(stream, Precision);
-    if precision.is_some() { stream.set_cursor_element(CompletionElement::Type) }
+    if precision.is_some() { stream.queue_cursor_element(CompletionElement::Type) }
 
     let value = parse_value_specifier(stream)?;
     parse_kind(stream, TokenKind::Equal)?;
@@ -112,11 +111,11 @@ pub fn parse_const(stream: &mut TokenStream) -> TopLevelResult {
 pub fn parse_varying(stream: &mut TokenStream) -> TopLevelResult {
     let keyword = stream.consume()?;
 
-    stream.set_cursor_element(CompletionElement::Interpolation);
+    stream.queue_cursor_element(CompletionElement::Interpolation);
     let interpolation = parse_conditional(stream, Interpolation);
-    if interpolation.is_some() { stream.set_cursor_element(CompletionElement::Precision) }
+    if interpolation.is_some() { stream.queue_cursor_element(CompletionElement::Precision) }
     let precision = parse_conditional(stream, Precision);
-    if precision.is_some() { stream.set_cursor_element(CompletionElement::Type) }
+    if precision.is_some() { stream.queue_cursor_element(CompletionElement::Type) }
 
     let value = parse_value_specifier(stream)?;
 
@@ -134,7 +133,7 @@ pub fn parse_uniform(stream: &mut TokenStream) -> TopLevelResult {
         Some(x) => (None, x),
         None => {
             let global_instance = stream.consume_if(|x| [Global, Instance].contains(&x.kind));
-            stream.set_cursor_element(CompletionElement::Uniform);
+            stream.queue_cursor_element(CompletionElement::Uniform);
             let keyword = stream.consume()?;
             if keyword.kind != Uniform {
                 let err = stream.alert_error("Expected 'Uniform' keyword", keyword.range);
@@ -143,15 +142,15 @@ pub fn parse_uniform(stream: &mut TokenStream) -> TopLevelResult {
             (global_instance, keyword)
         }
     };
-    stream.set_cursor_element(CompletionElement::Precision);
+    stream.queue_cursor_element(CompletionElement::Precision);
     let precision = parse_conditional(stream, Precision);
 
-    if precision.is_some() { stream.set_cursor_element(CompletionElement::Type) }
+    if precision.is_some() { stream.queue_cursor_element(CompletionElement::Type) }
 
     let value = parse_value_specifier(stream)?;
-    stream.set_cursor_element(CompletionElement::Hint(value.type_node.info.clone()));
+    stream.queue_cursor_element(CompletionElement::Hint(value.type_node.info.clone()));
     let hint = if parse_conditional(stream, Colon).is_some() {
-        stream.set_cursor_element(CompletionElement::Hint(value.type_node.info.clone()));
+        stream.queue_cursor_element(CompletionElement::Hint(value.type_node.info.clone()));
         let identifier = parse_identifier(stream)?;
         let params = if parse_conditional(stream, LeftParen).is_some() {
             let list = parse_list(
@@ -185,10 +184,10 @@ pub fn parse_uniform(stream: &mut TokenStream) -> TopLevelResult {
 
 pub fn parse_struct(stream: &mut TokenStream) -> TopLevelResult {
     let keyword = stream.consume()?;
-    stream.set_cursor_element(CompletionElement::None);
+    stream.queue_cursor_element(CompletionElement::None);
     let identifier = parse_identifier(stream)?;
 
-    stream.set_cursor_element(CompletionElement::Type);
+    stream.queue_cursor_element(CompletionElement::Type);
     parse_kind(stream, LeftBrace)?;
     let fields = parse_list(
         stream,
@@ -196,7 +195,7 @@ pub fn parse_struct(stream: &mut TokenStream) -> TopLevelResult {
         RightBrace,
         Trailing::Enforced,
         |s| {
-            s.set_cursor_element(CompletionElement::Type);
+            s.queue_cursor_element(CompletionElement::Type);
             parse_value_specifier(s) 
         }
     )?;
@@ -220,7 +219,7 @@ pub fn parse_function_arg(stream: &mut TokenStream) -> Result<ParamNode, TokenEr
 }
 
 pub fn parse_function(stream: &mut TokenStream) -> TopLevelResult {
-    stream.set_cursor_element(CompletionElement::TopLevelKeyword);
+    stream.queue_cursor_element(CompletionElement::TopLevelKeyword);
     let mut is_void = false;
     let type_node = match parse_conditional(stream, Void) {
         Some(x) => {
@@ -231,9 +230,9 @@ pub fn parse_function(stream: &mut TokenStream) -> TopLevelResult {
         None => parse_type(stream)?,
     };
     if is_void {
-        stream.set_cursor_element(CompletionElement::FunctionName);
+        stream.queue_cursor_element(CompletionElement::FunctionName);
     } else {
-        stream.set_cursor_element(CompletionElement::None);
+        stream.queue_cursor_element(CompletionElement::None);
     }
     let identifier = parse_identifier(stream)?;
 
@@ -261,10 +260,14 @@ pub fn parse_function(stream: &mut TokenStream) -> TopLevelResult {
 }
 
 pub fn parse_include(stream: &mut TokenStream) -> TopLevelResult {
-    let keyword = stream.consume()?;
+    let keyword = parse_kind(stream, Include)?;
 
-    stream.set_cursor_element(CompletionElement::Include);
-    let path = parse_kind(stream, String)?;
+    stream.queue_cursor_element(CompletionElement::IncludeString);
+    let path = stream.consume()?;
+    if path.kind != String {
+        return Err(stream.alert_error("Expected String", path.range));
+    }
+//    let path = parse_kind(stream, String)?;
 
     Ok(TopLevelNode::Include(IncludeNode{
         keyword,

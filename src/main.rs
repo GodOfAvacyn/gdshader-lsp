@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use gdshader_lsp::{
     completion::{get_completion_items, get_hover_description},
-    lexer::{MaybeOperator, TokenStream},
+    lexer::TokenStream,
     memory::Memory,
     source_code::send_errors,
     *
@@ -30,6 +30,7 @@ impl<'a> Server<'a> {
     pub fn change_document(&mut self, params: DidChangeTextDocumentParams) {
         let maybe_memory = self.memories.get_mut(&params.text_document.uri.to_string()); 
         if let Some(memory) = maybe_memory {
+            memory.root_dir = self.root_dir.clone();
             for change in params.content_changes {
                 memory.apply_change(change);
             }
@@ -40,6 +41,7 @@ impl<'a> Server<'a> {
         let maybe_memory = self.memories.get_mut(&params.text_document.uri.to_string()); 
         if let Some(old_memory) = maybe_memory {
             *old_memory = Memory::new(&old_memory.get_source().get_code(), self.root_dir.clone());
+            old_memory.root_dir = self.root_dir.clone();
             let diagnostics = old_memory.evaluate_new(None).clone();
             send_errors(&self.connection, &params.text_document.uri, diagnostics);
         }
@@ -64,7 +66,7 @@ fn main() {
 
     let mut server = Server {
         memories: HashMap::new(),
-        root_dir: None,
+        root_dir: Some("donkey".to_string()),
         connection: &connection
     };
 
@@ -136,6 +138,9 @@ pub fn handle_request(
                      .trim_matches(|x| x == '"')
                      .to_string()
                 );
+            for x in server.memories.iter_mut() {
+                x.1.root_dir = server.root_dir.clone();
+            }
             Ok(Response::new_ok(req.id, serde_json::to_value(
                 InitializeResult {
                     capabilities: ServerCapabilities {
@@ -147,7 +152,12 @@ pub fn handle_request(
                         completion_provider: Some(
                             lsp_types::CompletionOptions {
                                 trigger_characters: Some(
-                                    vec![".".to_string(), ":".to_string()]
+                                    vec![
+                                        "#".to_string(),
+                                        ".".to_string(),
+                                        ":".to_string(),
+                                        "\"".to_string(),
+                                    ]
                                 ),
                                 ..Default::default()
                             }
@@ -162,10 +172,12 @@ pub fn handle_request(
         }
         COMPLETION => {
             let cursor = get_cursor(&req.params);
+            eprintln!("the hover cursor is {:?}", cursor);
             let maybe_memory = server.get_memory_from_uri(&req);
 
             if let Some(memory) = maybe_memory {
                 let mut stream = TokenStream::new(&memory.get_source().get_code(), Some(cursor));
+                eprintln!("and the stuff was{:?}", stream.tokens);
                 let tree = parse_tokens(&mut stream);
                 evaluate_tree(memory, tree);
                 let names = get_completion_items(memory, cursor, &stream.cursor_element);

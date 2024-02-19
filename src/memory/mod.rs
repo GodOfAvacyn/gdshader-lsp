@@ -18,7 +18,6 @@ use crate::{get_byte_offset_from_position, interpreter::{evaluate_top_level_node
 
 pub struct Memory {
     pub root_dir: Option<String>,
-    pub valid_shader_includes: Vec<String>,
     pub shader_type: ShaderType,
     pub valid_render_modes: HashMap<String, String>,
     pub builtin_types: HashMap<String, BuiltinTypeInfo>,
@@ -44,7 +43,6 @@ impl Memory {
         
         Memory {
             root_dir,
-            valid_shader_includes: vec![],
             shader_type: ShaderType::Spatial,
             valid_render_modes: HashMap::new(),
             builtin_types: make_builtin_types(),
@@ -57,7 +55,6 @@ impl Memory {
     }
 
     pub fn get_builtin_types(&self, scope: usize) -> Vec<CompletionItem> {
-        eprintln!("I am apparently looking for a type");
         self.builtin_types
             .iter()
             .filter_map(|(name, info)| {
@@ -169,7 +166,8 @@ impl Memory {
             if path.is_file() && path.extension().unwrap_or_default() == "gdshaderinc" {
                 if let Some(file_name) = path.file_name() {
                     if let Some(file_name_str) = file_name.to_str() {
-                        result.push(file_name_str.to_string());
+                        let better_file_name = file_name_str.replace(root_path, "res://");
+                        result.push(better_file_name);
                     }
                 }
             }

@@ -1,5 +1,3 @@
-use crate::memory;
-
 use super::*;
 
 pub fn parse_expression(
@@ -21,7 +19,7 @@ pub fn parse_expression_priority(
     stream: &mut TokenStream,
 ) -> ExpressionResult {
     if !stream.parsing_statement {
-        stream.set_cursor_element(CompletionElement::Identifier(stream.parsing_const));
+        stream.queue_cursor_element(CompletionElement::Identifier(stream.parsing_const));
     }
 
     let mut original = if let Some(primitive) = parse_primitive(stream) {
@@ -173,7 +171,7 @@ pub fn parse_member_access_expression(
     stream: &mut TokenStream,
     original: ExpressionNode
 ) -> ExpressionResult {
-    stream.set_cursor_element(CompletionElement::Member(Box::new(original.clone())));
+    stream.queue_cursor_element(CompletionElement::Member(Box::new(original.clone())));
     stream.advance();
     let member = parse_identifier(stream)?;
 
