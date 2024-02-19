@@ -1,4 +1,4 @@
-use lsp::{
+use gdshader_lsp::{
     completion::{get_completion_items, get_hover_description},
     lexer::TokenStream,
     memory::Memory,
