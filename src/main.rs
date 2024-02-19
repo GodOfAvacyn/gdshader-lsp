@@ -166,11 +166,10 @@ pub fn handle_request(
 
 fn test() {
     let source = String::from(
-"shader_type spatial;
+"shader_type particles;
 
-void light() {
-
-
+void start() {
+    TRANSFORM = EMISSION_TRANSFORM;
 }"
     );
     let mut memory = Memory::new(&source);
@@ -179,9 +178,8 @@ void light() {
     evaluate_tree(&mut memory, tree);
 
     let mut one = 0;
-    for a in memory.scopes.scopes.iter().map(|x| x.range) {
-        eprintln!("{}, {:?}", one, a);
-        one += 1;
+    for diag in memory.get_source().get_diagnostics().clone() {
+        eprintln!("{:?}", diag.message);
     }
 }
 

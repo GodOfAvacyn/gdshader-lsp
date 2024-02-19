@@ -47,6 +47,7 @@ impl ExtraRange for Range {
     }
 
     fn preceeds_position(&self, position: Position) -> bool {
+        if position.character == 0 { return false }
         position.line > self.end.line ||
             (position.line == self.end.line &&
              position.character - 1 >= self.end.character)

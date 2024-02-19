@@ -105,7 +105,7 @@ pub fn parse_assignment_expression(
     op: Token,
     original: ExpressionNode
 ) -> ExpressionResult {
-    let right = parse_expression_priority(stream)?;
+    let right = parse_expression(stream)?;
 
     Ok(ExpressionNode::Assignment(AssignmentNode{
         left: Box::new(original),

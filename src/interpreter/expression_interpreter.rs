@@ -1,6 +1,7 @@
 use lsp_types::Range;
 use crate::{
-    lexer::{MaybeOperator, OperationType, Token},
+
+    lexer::{MaybeOperator, OperationType, Token, TokenKind},
     memory::{Memory, Primitive, TypeInfo},
     nodes::*
 };
@@ -67,24 +68,73 @@ fn eval_assignment_expr(
 ) -> ExprEvalResult {
     let left_range = assignment.left.range();
     let right_range = assignment.right.range();
-    let left_result = evaluate_expression(memory, *assignment.left)?;
-    let right_result = evaluate_expression(memory, *assignment.right)?;
-    if !left_result.is_assignable || left_result.is_const {
+    let left = evaluate_expression(memory, *assignment.left)?;
+    let right = evaluate_expression(memory, *assignment.right)?;
+    if !left.is_assignable || left.is_const {
         let message = "Cannot assign to a constant value.";
         return Err(memory.alert_error(message, left_range))
     }
-    if left_result.type_info != right_result.type_info {
+
+    let mut type_mismatch = || {
         let message = format!(
             "Type mismatch: '{}' and '{}'.",
-            left_result.type_info.to_string(),
-            right_result.type_info.to_string()
+            left.type_info.to_string(),
+            right.type_info.to_string()
         );
         return Err(memory.alert_error(&message, range));
+    };
+    let matmul_check = if assignment.op.kind == TokenKind::Star {
+        match (left.type_info.to_string().as_str(), right.type_info.to_string().as_str()) {
+            ("mat2", "vec2") => Some(left.type_info.clone()),
+            ("mat3", "vec3") => Some(left.type_info.clone()),
+            ("mat4", "vec4") => Some(left.type_info.clone()),
+            _ => None
+        }
+    } else { None };
+
+    if let Some(ty) = matmul_check {
+        Ok(ExpressionEvaluation::new(ty, left.is_const, false))
+    } else {
+        let correct_type = if assignment.op.kind == TokenKind::Equal {
+            if left.type_info != right.type_info {
+                eprintln!("{:?}", left.type_info);
+                eprintln!("{:?}", right.type_info);
+                return type_mismatch();
+            } else {
+                left.type_info.clone()
+            }
+        } else {
+            let left_size = if let Some(x) =
+                left.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
+                else { return type_mismatch() };
+            
+            let right_size = if let Some(x) =
+                right.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
+                else { return type_mismatch() };
+
+            let left_generic = if let Some(x) = left.type_info.get_generic_type() { x }
+            else { return type_mismatch() };
+
+            let right_generic = if let Some(x) = right.type_info.get_generic_type() { x }
+            else { return type_mismatch() };
+
+            if left_size == right_size {
+                left.type_info.clone()
+            } else {
+                if left_size == 1 {
+                    right.type_info.clone()
+                } else if right_size == 1 {
+                    left.type_info.clone()
+                } else {
+                    return type_mismatch();
+                }
+            }
+        };
+
+        eval_operation(memory, assignment.op.to_assignment_op().unwrap(), correct_type, left_range)?;
+        Ok(ExpressionEvaluation::new(left.type_info, left.is_const, false))
     }
-    for ty in [left_result.type_info.clone(), right_result.type_info.clone()] {
-        eval_operation(memory, assignment.op.to_assignment_op().unwrap(), ty, left_range)?;
-    }
-    Ok(ExpressionEvaluation::new(left_result.type_info, left_result.is_const, false))
+
 }
 
 fn eval_array_literal(
@@ -246,7 +296,7 @@ fn eval_call_expr(
         if !result.is_const{
             is_const = false
         }
-        arg_types.push((arg.qualifier.map(|x| x.kind), result.type_info));
+        arg_types.push(result.type_info);
     }
 
     let maybe_struct = memory.structs.get(&call_name);
@@ -256,7 +306,7 @@ fn eval_call_expr(
             .map(|x| &x.ty)
             .zip(arg_types.iter())
             .collect::<Vec<_>>();
-        for (info, (_, arg_info)) in correct_types {
+        for (info, arg_info) in correct_types {
             if *info != *arg_info {
                 let message = format!("Invalid arguments for function '{}'", call_name);
                 return Err(memory.alert_error(&message, range));
@@ -277,7 +327,7 @@ fn eval_call_expr(
         for signature in &function.signatures {
             let correct_types = signature.params
                 .iter()
-                .map(|x| (x.qualifier.clone().map(|y| y.kind()), x.ty.clone()))
+                .map(|x| x.ty.clone())
                 .collect::<Vec<_>>();
             if arg_types != correct_types {
                 continue;
@@ -288,14 +338,14 @@ fn eval_call_expr(
                 let generic_args: Vec<_> = correct_types
                     .iter()
                     .zip(arg_types.iter())
-                    .filter_map(|((_, generic), arg)| {
+                    .filter_map(|(generic, arg)| {
                         if generic.is_generically_sized().is_some() { Some(arg) }
                         else { None }
                     })
                     .collect();
 
-                let generic_size = generic_args[0].1.get_generic_size();
-                if generic_args.iter().all(|x| x.1.get_generic_size() == generic_size) {
+                let generic_size = generic_args[0].get_generic_size();
+                if generic_args.iter().all(|x| x.get_generic_size() == generic_size) {
                     let ty = TypeInfo::from_pieces(primitive_type, generic_size.unwrap());
                     return Ok(ExpressionEvaluation::new(ty, is_const, false));
                 }
@@ -303,14 +353,14 @@ fn eval_call_expr(
                 let generic_args: Vec<_> = correct_types
                     .iter()
                     .zip(arg_types.iter())
-                    .filter_map(|((_, generic), arg)| {
+                    .filter_map(|(generic, arg)| {
                         if generic.is_generically_typed().is_some() { Some(arg) }
                         else { None }
                     })
                     .collect();
 
-                let generic_type = generic_args[0].1.get_generic_type();
-                if generic_args.iter().all(|x| x.1.get_generic_type() == generic_type) {
+                let generic_type = generic_args[0].get_generic_type();
+                if generic_args.iter().all(|x| x.get_generic_type() == generic_type) {
                     let ty = TypeInfo::from_pieces(generic_type.unwrap(), generic_size);
                     return Ok(ExpressionEvaluation::new(ty, is_const, false));
                 }
@@ -372,37 +422,52 @@ fn eval_binary_expr(
     };
     let is_const = left.is_const && right.is_const;
 
-    let left_size = if let Some(x) =
-        left.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
-        else { return type_mismatch() };
-    
-    let right_size = if let Some(x) =
-        right.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
-        else { return type_mismatch() };
+    let matmul_check = if binary.op.kind == TokenKind::Star {
+        match (left.type_info.to_string().as_str(), right.type_info.to_string().as_str()) {
+            ("mat2", "vec2") => Some(right.type_info.clone()),
+            ("mat3", "vec3") => Some(right.type_info.clone()),
+            ("mat4", "vec4") => Some(right.type_info.clone()),
+            ("mat2", "mat2") => Some(right.type_info.clone()),
+            ("mat3", "mat3") => Some(right.type_info.clone()),
+            ("mat4", "mat4") => Some(right.type_info.clone()),
+            _ => None
+        }
+    } else { None };
 
-    let left_generic = if let Some(x) = left.type_info.get_generic_type() { x }
-    else { return type_mismatch() };
-
-    let right_generic = if let Some(x) = right.type_info.get_generic_type() { x }
-    else { return type_mismatch() };
-
-    let correct_type = if left_size == right_size {
-        left.type_info.clone()
+    if let Some(ty) = matmul_check {
+        Ok(ExpressionEvaluation::new(ty, is_const, false))
     } else {
-        if left_size == 1 {
-            right.type_info.clone()
-        } else if right_size == 1 {
+        let left_size = if let Some(x) =
+            left.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
+            else { return type_mismatch() };
+        
+        let right_size = if let Some(x) =
+            right.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
+            else { return type_mismatch() };
+
+        let left_generic = if let Some(x) = left.type_info.get_generic_type() { x }
+        else { return type_mismatch() };
+
+        let right_generic = if let Some(x) = right.type_info.get_generic_type() { x }
+        else { return type_mismatch() };
+
+        let correct_type = if left_size == right_size {
             left.type_info.clone()
         } else {
-            return type_mismatch();
+            if left_size == 1 {
+                right.type_info.clone()
+            } else if right_size == 1 {
+                left.type_info.clone()
+            } else {
+                return type_mismatch();
+            }
+        };
+        if left_generic != right_generic {
+            type_mismatch()
+        } else {
+            eval_operation(memory, binary.op.to_binary_op().unwrap(), correct_type, range)
+                .map(|ty| ExpressionEvaluation::new(ty, is_const, false))
         }
-    };
-
-    if left_generic != right_generic {
-        type_mismatch()
-    } else {
-        eval_operation(memory, binary.op.to_binary_op().unwrap(), correct_type, range)
-            .map(|ty| ExpressionEvaluation::new(ty, is_const, false))
     }
 }
 

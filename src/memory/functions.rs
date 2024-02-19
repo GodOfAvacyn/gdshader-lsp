@@ -113,11 +113,19 @@ pub fn make_builtin_functions() -> HashMap<String, FunctionInfo> {
             "Cast to a vec2." const
         ),
         builtin_function!(
-            vec3 [(number x,) -> vec3, (number x, number y, number z,) -> vec3,]
+            vec3 [
+                (number x,) -> vec3,
+                (number x, number y, number z,) -> vec3,
+                (vec2 x, number y,) -> vec3,
+            ]
             "Cast to a vec3." const
         ),
         builtin_function!(
-            vec4 [(number x,) -> vec4, (number x, number y, number z, number w,) -> vec4,]
+            vec4 [
+                (number x,) -> vec4,
+                (number x, number y, number z, number w,) -> vec4,
+                (vec3 x, number y,) -> vec4,
+            ]
             "Cast to a vec4." const
         ),
         builtin_function!(
@@ -125,36 +133,60 @@ pub fn make_builtin_functions() -> HashMap<String, FunctionInfo> {
             "Cast to an ivec2." const
         ),
         builtin_function!(
-            ivec3 [(int x,) -> ivec3, (int x, int y, int z,) -> ivec3,]
-            "Cast to an ivec3." const
+            ivec3 [
+                (int x,) -> ivec3,
+                (int x, int y, int z,) -> ivec3,
+                (ivec2 x, int y,) -> ivec3,
+            ]
+            "Cast to a vec3." const
         ),
         builtin_function!(
-            ivec4 [(int x,) -> ivec4, (int x, int y, int z, int w,) -> ivec4,]
-            "Cast to an ivec4." const
+            ivec4 [
+                (int x,) -> ivec4,
+                (int x, int y, int z, int w,) -> ivec4,
+                (ivec3 x, int y,) -> ivec4,
+            ]
+            "Cast to a vec4." const
         ),
         builtin_function!(
             uvec2 [(uint x,) -> vec2, (uint x, uint y,) -> uvec2,]
             "Cast to a uvec2." const
         ),
         builtin_function!(
-            uvec3 [(uint x,) -> uvec3, (uint x, uint y, uint z,) -> uvec3,]
-            "Cast to a uvec3." const
+            uvec3 [
+                (uint x,) -> uvec3,
+                (uint x, uint y, uint z,) -> uvec3,
+                (uvec2 x, uint y,) -> uvec3,
+            ]
+            "Cast to a vec3." const
         ),
         builtin_function!(
-            uvec4 [(uint x,) -> uvec4, (uint x, uint y, uint z, uint w,) -> uvec4,]
-            "Cast to a uvec4." const
+            uvec4 [
+                (uint x,) -> uvec4,
+                (uint x, uint y, uint z, uint w,) -> uvec4,
+                (uvec3 x, uint y,) -> uvec4,
+            ]
+            "Cast to a vec4." const
         ),
         builtin_function!(
             bvec2 [(bool x,) -> bvec2, (bool x, bool y,) -> bvec2,]
             "Cast to a bvec2." const
         ),
         builtin_function!(
-            bvec3 [(bool x,) -> bvec3, (bool x, bool y, bool z,) -> bvec3,]
-            "Cast to a bvec3." const
+            bvec3 [
+                (bool x,) -> bvec3,
+                (bool x, bool y, bool z,) -> bvec3,
+                (bvec2 x, bool y,) -> bvec3,
+            ]
+            "Cast to a vec3." const
         ),
         builtin_function!(
-            bvec4 [(bool x,) -> bvec4, (bool x, bool y, bool z, bool w,) -> bvec4,]
-            "Cast to a bvec4." const
+            bvec4 [
+                (bool x,) -> bvec4,
+                (bool x, bool y, bool z, bool w,) -> bvec4,
+                (bvec3 x, bool y,) -> bvec4,
+            ]
+            "Cast to a vec4." const
         ),
         builtin_function!(
             mat2 [(vec2 x, vec2 y,) -> mat2,]
