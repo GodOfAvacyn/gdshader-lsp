@@ -5,13 +5,15 @@ Gdshader-lsp ins a language server for the Godot Shading Language that runs inde
 This was made at the same time as [tree-sitter-gdshader](https://github.com/GodOfAvacyn/tree-sitter-gdshader), which is used for syntax highlighting (also a WIP, but support for neovim is sort of there).
 ## Download Instructions
 ---
-To download the server, run the following command in a terminal:
+GDShader is now available as a VSCode extension! Getting it that way comes built-in with syntax highlighting, so you don't need to do any nonsense with my treesitter repo.
+
+To download the server for manual use, run the following command in a terminal to grab the binary:
 ```
 wget https://github.com/GodOfAvacyn/gdshader-lsp/releases/download/v0.1/gdshader-lsp
 ```
 Alternatively, you can download the source code and build it yourself. This project was done in Rust, so you will need a variant of Cargo installed to use it.
 
-There is currently very few ways to actually use this language server without additional work. I am in the process of writing a VsCode client extension for the server, and am trying to contact the maintainers of [lspconfig](https://github.com/neovim/nvim-lspconfig) for better Neovim support. For now, here is how to manually add the languag server to Neovim:
+If you are a neovim user, here is how to manually add the languag server to Neovim:
 1. create a custom lua function somewhere in your neovim configuration:
    ```
     function gdshader()
@@ -25,11 +27,11 @@ There is currently very few ways to actually use this language server without ad
     end
    ```
 2. When editing a .gdshader file, start the language server with ':lua gdshader()'. You'll need to call that function for each new gdshader file you open (but only once) (and until I can set up a real client for neovim).
+3. (Optional) follow steps at [tree-sitter-gdshader](https://github.com/GodOfAvacyn/tree-sitter-gdshader) to get syntax highlighting support.
 
 ## Features
 ---
-Gdshader-lsp currently has support for code completion, hover hints, error messages, and include statements. It lacks support for some key features - notably, support for preprocessor macros (which, in its current form, this will probably be a deal-breaker for many people). Here is a full list of coming features that, in my opinion, would make it usable:
-* Jump to definitioin
+Gdshader-lsp currently has support for code completion, hover hints, error messages, and include statements. It lacks support for some key features - notably, support for other preprocessor macros (which, in its current form, this will probably be a deal-breaker for many people). Here is a full list of coming features that, in my opinion, would make it more usable, in my opinion:
+* Jump to definition
 * Preprocessor macro support
-* An actual Vscode extetnsion
 * A spot among the supported lspconfig servers for Neovim.
