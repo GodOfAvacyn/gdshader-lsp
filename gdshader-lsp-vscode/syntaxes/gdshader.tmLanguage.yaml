@@ -15,6 +15,7 @@ repository:
       - include: '#primitive'
       - include: '#symbol'
       - include: '#string'
+      - include: '#comment'
   keyword:
     match: >- 
       (?x)
@@ -162,7 +163,7 @@ repository:
         UVW | SIZE |
         SDF | DENSITY
         )\b
-    name: constant 
+    name: support.class
   function:
     match:
       (?x)
@@ -210,7 +211,7 @@ repository:
     name: entity.name.function
   primitive:
     match: \b((\b(\d+(.\d*)?(u)?)\b)|true|false)\b
-    name: constant
+    name: constant 
   string:
     begin: "\""
     end: "\""
@@ -219,7 +220,10 @@ repository:
     match: \w+(?=\()
     name: entity.name.function
   symbol:
-    match: (\*|-|\+|/|%|=|\||\&|\^|<|>|#)
+    match: (\*|-|\+|%|=|/(?!/)|\&|\^|<|>|#)
     name: keyword.operator
+  comment:
+    match: (\/\/.*$)
+    name: comment
 
 

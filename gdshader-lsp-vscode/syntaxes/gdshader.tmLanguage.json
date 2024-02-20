@@ -37,6 +37,9 @@
         },
         {
           "include": "#string"
+        },
+        {
+          "include": "#comment"
         }
       ]
     },
@@ -54,7 +57,7 @@
     },
     "builtin_variable": {
       "match": "(?x) \\b( VIEWPORT_SIZE | VIEW_MATRIX | INV_VIEW_MATRIX | INV_PROJECTION_MATRIX | NODE_POSITION_WORLD | NODE_POSITION_VIEW | CAMERA_POSITION_WORLD | CAMERA_DIRECTION_WORLD | OUTPUT_IS_SRGB | INSTANCE_ID | INSTANCE_CUSTOM | VIEW_INDEX | VIEW_MONO_LEFT | VIEW_RIGHT | EYE_OFFSET | VERTEX | VERTEX_ID | NORMAL | TANGENT | BINORMAL | POSITION | UV | UV2 | COLOR | ROUGHNESS | POINT_SIZE | MODELVIEW_MATRIX | MODELVIEW_NORMAL_MATRIX | MODEL_MATRIX | MODEL_NORMAL_MATRIX | PROJECTION_MATRIX | BONE_INDICES | BONE_WEIGHTSVIEWPORT_SIZE | FRAGCOORD | FRONT_FACING | VIEW | POINT_COORD | SCREEN_TEXTURE | SCREEN_UV | DEPTH_TEXTURE | DEPTH | NORMAL_MAP | NORMAL_MAP_DEPTH | ALBEDO | ALPHA | ALPHA_SCISSOR_THRESHOLD | ALPHA_HASH_SCALE | ALPHA_ANTIALIASING_EDGE | ALPHA_TEXTURE_COORDINATE | METALLIC | SPECULAR | RIM | RIM_TINT | CLEARCOAT | CLEARCOAT_GLOSS | ANISOTROPY | ANISOTROPY_FLOW | SSS_STRENGTH | SSS_TRANSMITTANCE_COLOR | SSS_TRANSMITTANCE_DEPTH | SSS_TRANSMITTANCE_BOOST | BACKLIGHT | AO | AO_LIGHT_AFFECT | EMISSION | FOG | RADIANCE | IRRADIANCE | LIGHT | LIGHT_COLOR | SPECULAR_AMOUNT | LIGHT_IS_DIRECTIONAL | ATTENUATION | DIFFUSE_LIGHT | SPECULAR_LIGHT | CANVAS_MATRIX | SCREEN_MATRIX | AT_LIGHT_PASS | TEXTURE_PIXEL_SIZE | SCREEN_PIXEL_SIZE | TEXTURE | SPECULAR_SHININESS_TEXTURE | SPECULAR_SHININESS | NORMAL_TEXTURE | SHADOW_VERTEX | LIGHT_VERTEX | LIGHT_ENERGY | LIGHT_POSITION | LIGHT_DIRECTION | SHADOW_MODULATE | LIFETIME | DELTA | NUMBER | INDEX | EMISSION_TRANSFORM | RANDOM_SEED | ACTIVE | VELOCITY | TRANSFORM | CUSTOM | MASS | USERDATAX | FLAG_EMIT_POSITION | FLAG_EMIT_ROT_SCALE | FLAG_EMIT_VELOCITY | FLAG_EMIT_COLOR | FLAG_EMIT_CUSTOM | EMITTER_VELOCITY | INTERPOLATE_TO_END | AMOUNT_RATIO | RESTART_POSITION | RESTART_ROT_SCALE | RESTART_VELOCITY | RESTART_COLOR | RESTART_CUSTOM | RESTART | COLLIDED | COLLISION_NORMAL | COLLISION_DEPTH | ATTRACTOR_FORCE | TIME | AT_HALF_RES_PASS | AT_QUARTER_RES_PASS | AT_CUBEMAP_PASS | LIGHTX_ENABLED | LIGHTX_ENERGY | LIGHTX_DIRECTION | LIGHTX_COLOR | LIGHTX_SIZE | PI | TAU | E | WORLD_POSITION | OBJECT_POSITION | UVW | SIZE | SDF | DENSITY )\\b",
-      "name": "constant"
+      "name": "support.class"
     },
     "function": {
       "match": "(?x) \\b( radians | degrees | sin | cos | tan | asin | acos | atan | sinh | cosh | tanh | asinh | acosh | atanh | pow | exp | exp2 | log | log2 | sqrt | inversesqrt | abs | sign | floor | round | roundEven | trunc | ceil | fract | mod | mod | modf | min | max | clamp | textureSize | textureQueryLod | textureQueryLevels | texture | textureProj | textureLod | textureProjLod | textureGrad | textureProjGrad | texelFetch | textureGather dFdx | dFdxCoarse | dFdxFine | dFdy | dFdyCoarse | dFdyFine | fwidth | fwidthCoarse | fwidthFine | packHalf2x16 | unpackHalf2x16 | packUnorm2x16 | unpackUnorm2x16 | packSnorm2x16 | unpackSnorm2x16 | packUnorm4x8 | unpackUnorm4x8 | packSnorm4x8 | unpackSnorm4x8 bitfieldExtract | bitfieldInsert | bitfieldReverse | bitCount | findLSB | findMSB | imulExtended | umulExtended | uaddCarry | usubBorrow | ldexp | frexp )\\b",
@@ -74,8 +77,12 @@
       "name": "entity.name.function"
     },
     "symbol": {
-      "match": "(\\*|-|\\+|/|%|=|\\||\\&|\\^|<|>|#)",
+      "match": "(\\*|-|\\+|%|=|/(?!/)|\\&|\\^|<|>|#)",
       "name": "keyword.operator"
+    },
+    "comment": {
+      "match": "(\\/\\/.*$)",
+      "name": "comment"
     }
   }
 }

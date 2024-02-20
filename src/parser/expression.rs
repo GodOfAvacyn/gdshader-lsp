@@ -70,7 +70,7 @@ pub fn parse_call_expression(
         RightParen,
         Trailing::Optional,
         |s| parse_expression(s)
-            .map(|e| CallArgumentNode{qualifier: parse_qualifier(s), expression: e})
+            .map(|e| CallArgumentNode{qualifier: None, expression: e})
     )?;
     stream.advance();
     Ok(ExpressionNode::Call(CallNode {
