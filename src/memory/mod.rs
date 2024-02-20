@@ -191,11 +191,9 @@ impl Memory {
         for entry in walker.filter_map(|e| e.ok()) {
             let path = entry.path();
             if path.is_file() && path.extension().unwrap_or_default() == "gdshaderinc" {
-                if let Some(file_name) = path.file_name() {
-                    if let Some(file_name_str) = file_name.to_str() {
-                        let better_file_name = file_name_str.replace(root_path, "res://");
-                        result.push(better_file_name);
-                    }
+                if let Some(path) = path.to_str() {
+                    let better_path = path.replace(root_path, "res://");
+                    result.push(better_path);
                 }
             }
         }
