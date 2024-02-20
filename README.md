@@ -32,6 +32,6 @@ If you are a neovim user, here is how to manually add the languag server to Neov
 ## Features
 ---
 Gdshader-lsp currently has support for code completion, hover hints, error messages, and include statements. It lacks support for some key features - notably, support for other preprocessor macros (which, in its current form, this will probably be a deal-breaker for many people). Here is a full list of coming features that, in my opinion, would make it more usable, in my opinion:
-* Jump to definitioin
+* Jump to definition
 * Preprocessor macro support
 * A spot among the supported lspconfig servers for Neovim.
