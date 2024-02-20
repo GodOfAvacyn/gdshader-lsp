@@ -54,6 +54,33 @@ impl Memory {
         }
     }
 
+    pub fn evaluate(&mut self, top_levels: Vec<TopLevelNode>) -> &Vec<Diagnostic> {
+        let mut scopes = ScopeList::new();
+        if self.root_dir.is_some() {
+            scopes.extend(variable_builtins());
+        }
+        let functions = if self.root_dir.is_none() { HashMap::new() }
+        else { make_builtin_functions() };
+        self.scopes = scopes;
+        self.functions = functions;
+
+        for top_level in top_levels {
+            _ = evaluate_top_level_node(top_level, self);
+        }
+
+        self.source.get_diagnostics()
+    }
+
+    pub fn evaluate_new(&mut self, cursor: Option<Position>) -> &Vec<Diagnostic> {
+        let mut stream = TokenStream::new(self.source.get_code(), cursor);
+        let tree = parse_tokens(&mut stream);
+
+        let mut diagnostics = stream.get_source().get_diagnostics().clone();
+        self.source.add_diagnostics(diagnostics);
+        self.evaluate(tree)
+    }
+
+
     pub fn get_builtin_types(&self, scope: usize) -> Vec<CompletionItem> {
         self.builtin_types
             .iter()
@@ -174,23 +201,6 @@ impl Memory {
         }
     
         result
-    }
-
-    pub fn evaluate(&mut self, top_levels: Vec<TopLevelNode>) -> &Vec<Diagnostic> {
-        for top_level in top_levels {
-            _ = evaluate_top_level_node(top_level, self);
-        }
-
-        self.source.get_diagnostics()
-    }
-
-    pub fn evaluate_new(&mut self, cursor: Option<Position>) -> &Vec<Diagnostic> {
-        let mut stream = TokenStream::new(self.source.get_code(), cursor);
-        let tree = parse_tokens(&mut stream);
-
-        let mut diagnostics = stream.get_source().get_diagnostics().clone();
-        self.source.add_diagnostics(diagnostics);
-        self.evaluate(tree)
     }
 
     pub fn apply_change(&mut self, change: TextDocumentContentChangeEvent) {

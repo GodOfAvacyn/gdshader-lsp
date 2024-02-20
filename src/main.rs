@@ -172,14 +172,12 @@ pub fn handle_request(
         }
         COMPLETION => {
             let cursor = get_cursor(&req.params);
-            eprintln!("the hover cursor is {:?}", cursor);
             let maybe_memory = server.get_memory_from_uri(&req);
 
             if let Some(memory) = maybe_memory {
                 let mut stream = TokenStream::new(&memory.get_source().get_code(), Some(cursor));
-                eprintln!("and the stuff was{:?}", stream.tokens);
                 let tree = parse_tokens(&mut stream);
-                evaluate_tree(memory, tree);
+                memory.evaluate(tree);
                 let names = get_completion_items(memory, cursor, &stream.cursor_element);
 
                 Ok(Response::new_ok(

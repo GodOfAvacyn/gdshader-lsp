@@ -1,0 +1,81 @@
+{
+  "scopeName": "source.gdshader",
+  "patterns": [
+    {
+      "include": "#expression"
+    }
+  ],
+  "repository": {
+    "expression": {
+      "patterns": [
+        {
+          "include": "#keyword"
+        },
+        {
+          "include": "#subkeyword"
+        },
+        {
+          "include": "#builtin_type"
+        },
+        {
+          "include": "#builtin_variable"
+        },
+        {
+          "include": "#function"
+        },
+        {
+          "include": "#notfunction"
+        },
+        {
+          "include": "#identifier"
+        },
+        {
+          "include": "#primitive"
+        },
+        {
+          "include": "#symbol"
+        },
+        {
+          "include": "#string"
+        }
+      ]
+    },
+    "keyword": {
+      "match": "(?x)\n  \\b(\n  render_mode | shader_type |\n  render_mode | shader_type |\n  group_uniforms | const |\n  varying | uniform |\n  global | instance |\n  struct | include |\n  in | out |\n  inout | if |\n  for | while |\n  switch | case |\n  default | break |\n  return | continue |\n  flat | smooth |\n  lowp | mediump |\n  highp\n  )\\b",
+      "name": "keyword"
+    },
+    "subkeyword": {
+      "match": "(?x) \n  \\b(\n  spatial | canvas_item | particles | sky | fog |\n  blend_mix | blend_add |\n  blend_sub | blend_mul |\n  depth_draw_opaque | depth_draw_always |\n  depth_draw_never | depth_prepass_alpha |\n  depth_test_disabled | sss_mode_skin |\n  cull_back | cull_front |\n  cull_disabled | unshaded |\n  wireframe | diffuse_burley |\n  diffuse_lambert | diffuse_lambert_wrap |\n  diffuse_toon | specular_schlick_ggx |\n  specular_toon | specular_disabled |\n  skip_vertex_transform | world_vertex_coords |\n  ensure_correct_normals | shadows_disabled |\n  ambient_light_disabled | shadow_to_opacity |\n  vertex_lighting | particle_trails |\n  alpha_to_coverage | alpha_to_coverage_and_one |\n  fog_disabled | blend_premul_alpha |\n  blend_disabled | light_only |\n  keep_data | disable_force |\n  disable_velocity | collision_use_scaleuse_half_res_pass |\n  use_quarter_res_pass | disable_fog\n  )\\b",
+      "name": "support.class"
+    },
+    "builtin_type": {
+      "match": "(?x) \\b( void | bool | bvec2 | bvec3 | bvec4 | int | ivec2 | ivec3 | ivec4 | uint | uvec2 | uvec3 | uvec4 | float | vec2 | vec3 | vec4 | mat2 | mat3 | mat4 | sampler2D | isampler2D | usampler2D | sampler2DArray | isampler2DArray | usampler2DArray | sampler3D | isampler3D | usampler3D | samplerCube | samplerCubeArray | const | varying )\\b",
+      "name": "support.type"
+    },
+    "builtin_variable": {
+      "match": "(?x) \\b( VIEWPORT_SIZE | VIEW_MATRIX | INV_VIEW_MATRIX | INV_PROJECTION_MATRIX | NODE_POSITION_WORLD | NODE_POSITION_VIEW | CAMERA_POSITION_WORLD | CAMERA_DIRECTION_WORLD | OUTPUT_IS_SRGB | INSTANCE_ID | INSTANCE_CUSTOM | VIEW_INDEX | VIEW_MONO_LEFT | VIEW_RIGHT | EYE_OFFSET | VERTEX | VERTEX_ID | NORMAL | TANGENT | BINORMAL | POSITION | UV | UV2 | COLOR | ROUGHNESS | POINT_SIZE | MODELVIEW_MATRIX | MODELVIEW_NORMAL_MATRIX | MODEL_MATRIX | MODEL_NORMAL_MATRIX | PROJECTION_MATRIX | BONE_INDICES | BONE_WEIGHTSVIEWPORT_SIZE | FRAGCOORD | FRONT_FACING | VIEW | POINT_COORD | SCREEN_TEXTURE | SCREEN_UV | DEPTH_TEXTURE | DEPTH | NORMAL_MAP | NORMAL_MAP_DEPTH | ALBEDO | ALPHA | ALPHA_SCISSOR_THRESHOLD | ALPHA_HASH_SCALE | ALPHA_ANTIALIASING_EDGE | ALPHA_TEXTURE_COORDINATE | METALLIC | SPECULAR | RIM | RIM_TINT | CLEARCOAT | CLEARCOAT_GLOSS | ANISOTROPY | ANISOTROPY_FLOW | SSS_STRENGTH | SSS_TRANSMITTANCE_COLOR | SSS_TRANSMITTANCE_DEPTH | SSS_TRANSMITTANCE_BOOST | BACKLIGHT | AO | AO_LIGHT_AFFECT | EMISSION | FOG | RADIANCE | IRRADIANCE | LIGHT | LIGHT_COLOR | SPECULAR_AMOUNT | LIGHT_IS_DIRECTIONAL | ATTENUATION | DIFFUSE_LIGHT | SPECULAR_LIGHT | CANVAS_MATRIX | SCREEN_MATRIX | AT_LIGHT_PASS | TEXTURE_PIXEL_SIZE | SCREEN_PIXEL_SIZE | TEXTURE | SPECULAR_SHININESS_TEXTURE | SPECULAR_SHININESS | NORMAL_TEXTURE | SHADOW_VERTEX | LIGHT_VERTEX | LIGHT_ENERGY | LIGHT_POSITION | LIGHT_DIRECTION | SHADOW_MODULATE | LIFETIME | DELTA | NUMBER | INDEX | EMISSION_TRANSFORM | RANDOM_SEED | ACTIVE | VELOCITY | TRANSFORM | CUSTOM | MASS | USERDATAX | FLAG_EMIT_POSITION | FLAG_EMIT_ROT_SCALE | FLAG_EMIT_VELOCITY | FLAG_EMIT_COLOR | FLAG_EMIT_CUSTOM | EMITTER_VELOCITY | INTERPOLATE_TO_END | AMOUNT_RATIO | RESTART_POSITION | RESTART_ROT_SCALE | RESTART_VELOCITY | RESTART_COLOR | RESTART_CUSTOM | RESTART | COLLIDED | COLLISION_NORMAL | COLLISION_DEPTH | ATTRACTOR_FORCE | TIME | AT_HALF_RES_PASS | AT_QUARTER_RES_PASS | AT_CUBEMAP_PASS | LIGHTX_ENABLED | LIGHTX_ENERGY | LIGHTX_DIRECTION | LIGHTX_COLOR | LIGHTX_SIZE | PI | TAU | E | WORLD_POSITION | OBJECT_POSITION | UVW | SIZE | SDF | DENSITY )\\b",
+      "name": "constant"
+    },
+    "function": {
+      "match": "(?x) \\b( radians | degrees | sin | cos | tan | asin | acos | atan | sinh | cosh | tanh | asinh | acosh | atanh | pow | exp | exp2 | log | log2 | sqrt | inversesqrt | abs | sign | floor | round | roundEven | trunc | ceil | fract | mod | mod | modf | min | max | clamp | textureSize | textureQueryLod | textureQueryLevels | texture | textureProj | textureLod | textureProjLod | textureGrad | textureProjGrad | texelFetch | textureGather dFdx | dFdxCoarse | dFdxFine | dFdy | dFdyCoarse | dFdyFine | fwidth | fwidthCoarse | fwidthFine | packHalf2x16 | unpackHalf2x16 | packUnorm2x16 | unpackUnorm2x16 | packSnorm2x16 | unpackSnorm2x16 | packUnorm4x8 | unpackUnorm4x8 | packSnorm4x8 | unpackSnorm4x8 bitfieldExtract | bitfieldInsert | bitfieldReverse | bitCount | findLSB | findMSB | imulExtended | umulExtended | uaddCarry | usubBorrow | ldexp | frexp )\\b",
+      "name": "entity.name.function"
+    },
+    "primitive": {
+      "match": "\\b((\\b(\\d+(.\\d*)?(u)?)\\b)|true|false)\\b",
+      "name": "constant"
+    },
+    "string": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string"
+    },
+    "notfunction": {
+      "match": "\\w+(?=\\()",
+      "name": "entity.name.function"
+    },
+    "symbol": {
+      "match": "(\\*|-|\\+|/|%|=|\\||\\&|\\^|<|>|#)",
+      "name": "keyword.operator"
+    }
+  }
+}

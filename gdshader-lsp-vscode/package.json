@@ -1,7 +1,10 @@
 {
     "name": "gdshader-lsp",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "description": "Language server for the GDShader language.",
+    "icon": "icon.png",
+    "readme": "README.md",
+    "publisher": "godofavacyn",
     "author": "godofavacyn",
     "license": "ISC",
     "engines": {
@@ -20,7 +23,7 @@
                     "scope": "resource",
                     "type": "number",
                     "default": 100,
-                    "description": "Controls the maximum number of problems produced by the server."
+                    "description": "Controls the max number of problems produced by the server."
                 },
                 "languageServerExample.trace.server": {
                     "scope": "window",
@@ -31,10 +34,20 @@
                         "verbose"
                     ],
                     "default": "off",
-                    "description": "Traces the communication between VS Code and the language server."
+                    "description": "Traces the communication between client and server."
                 }
             }
-        }
+        },
+        "languages": [{
+            "id": "gdshader",
+            "extensions": [".gdshader",".gdshaderinc"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "gdshader",
+            "scopeName": "source.gdshader",
+            "path": "./syntaxes/gdshader.tmLanguage.json"
+        }]
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

@@ -65,7 +65,6 @@ pub fn get_completion_items(
                 "group_uniforms",
                 "struct",
                 "void",
-                "#include"
             ]
                 .iter()
                 .map(|x| CompletionItem {
@@ -74,6 +73,12 @@ pub fn get_completion_items(
                     ..Default::default()
                 })
                 .chain(memory.get_builtin_types(1))
+                .chain([CompletionItem{
+                    label: "#include".to_string(),
+                    kind: Some(CompletionItemKind::VALUE),
+                    insert_text: Some("include".to_string()),
+                    ..Default::default()
+                }].into_iter())
                 .collect()
         },
         CompletionElement::ShaderType => {
@@ -255,6 +260,7 @@ pub fn get_completion_items(
                 .map(|x| CompletionItem {
                     label: format!("\"{}\"",x.to_string()),
                     kind: Some(CompletionItemKind::TEXT),
+                    insert_text: Some(x.to_string()),
                     ..Default::default()
                 })
                 .collect()
