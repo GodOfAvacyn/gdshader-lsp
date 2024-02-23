@@ -107,6 +107,8 @@ pub enum TokenKind {
     #[token("%=")] ModAssign,
     #[token("++")] Increment,
     #[token("--")] Decrement,
+    #[token("&&")] And,
+    #[token("||")] Or,
     #[token("<<")] LeftOp,
     #[token(">>")] RightOp,
     #[token("<=")] LeqOp,

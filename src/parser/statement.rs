@@ -92,9 +92,11 @@ pub fn parse_var_declaration_statement(stream: &mut TokenStream) -> StatementRes
 pub fn parse_if_statement(stream: &mut TokenStream) -> StatementResult {
     let keyword = stream.consume()?;
     parse_kind(stream, LeftParen)?;
+    stream.parsing_statement = false;
     let condition = Box::new(parse_expression(stream)?); 
     parse_kind(stream, RightParen)?;
     let action = Box::new(parse_statement(stream)?);
+    stream.queue_cursor_element(CompletionElement::Identifier(stream.parsing_const));
     let alternate = match parse_conditional(stream, Else) {
         Some(token) => Some(ElseNode {
             keyword: token,

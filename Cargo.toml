@@ -13,3 +13,8 @@ regex = "1.10"
 serde_json = "1.0.1"
 strum_macros = "0.26.1"
 walkdir = "2.4"
+
+[target.x86_64-apple-darwin]
+linker = "x86_64-apple-darwin14-clang"
+ar = "x86_64-apple-darwin14-ar"
+

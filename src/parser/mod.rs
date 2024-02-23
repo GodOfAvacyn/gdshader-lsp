@@ -11,7 +11,6 @@ pub use statement::*;
 
 
 pub fn parse_kind(stream: &mut TokenStream, kind: TokenKind) -> TokenResult {
-    stream.queue_cursor_element(CompletionElement::None);
     stream.consume_token_kind(kind)
 }
 

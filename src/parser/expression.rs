@@ -133,6 +133,7 @@ pub fn parse_parenthetical_expression(stream: &mut TokenStream) -> ExpressionRes
     stream.advance();
     let expr = Box::new(parse_expression(stream)?);
     parse_kind(stream, RightParen)?;
+    eprintln!("current: {:?}", stream.cursor_element);
 
     Ok(ExpressionNode::Paren(expr))
 }

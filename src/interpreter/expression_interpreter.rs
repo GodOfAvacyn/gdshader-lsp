@@ -94,6 +94,8 @@ fn eval_assignment_expr(
 
     if let Some(ty) = matmul_check {
         Ok(ExpressionEvaluation::new(ty, left.is_const, false))
+    } else if let Some(ty) = matmul_check {
+        Ok(ExpressionEvaluation::new(ty, left.is_const, false))
     } else {
         let correct_type = if assignment.op.kind == TokenKind::Equal {
             if left.type_info != right.type_info {
@@ -110,11 +112,11 @@ fn eval_assignment_expr(
                 right.type_info.get_generic_size().map_or(None, |x| x.as_size()) { x }
                 else { return type_mismatch() };
 
-            let left_generic = if let Some(x) = left.type_info.get_generic_type() { x }
-            else { return type_mismatch() };
-
-            let right_generic = if let Some(x) = right.type_info.get_generic_type() { x }
-            else { return type_mismatch() };
+//            let left_generic = if let Some(x) = left.type_info.get_generic_type() { x }
+//            else { return type_mismatch() };
+//
+//            let right_generic = if let Some(x) = right.type_info.get_generic_type() { x }
+//            else { return type_mismatch() };
 
             if left_size == right_size {
                 left.type_info.clone()
@@ -431,8 +433,21 @@ fn eval_binary_expr(
             _ => None
         }
     } else { None };
+    let boolean_check = match binary.op.kind {
+        TokenKind::And | TokenKind::Or =>
+            match (left.type_info.to_string().as_str(), right.type_info.to_string().as_str())  {
+                ("bool", "bool") => Some(left.type_info.clone()),
+                ("bvec2", "bvec2") => Some(left.type_info.clone()),
+                ("bvec3", "bvec3") => Some(left.type_info.clone()),
+                ("bvec4", "bvec4") => Some(left.type_info.clone()),
+                _ => None
+            },
+        _ => None,
+    };
 
     if let Some(ty) = matmul_check {
+        Ok(ExpressionEvaluation::new(ty, is_const, false))
+    } else if let Some(ty) = boolean_check {
         Ok(ExpressionEvaluation::new(ty, is_const, false))
     } else {
         let left_size = if let Some(x) =

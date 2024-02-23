@@ -79,7 +79,7 @@ impl TypeInfo {
             (Uint, GVec2Type) => Self { base: "uvec2".to_string(), size: 0 },
             (Uint, GVec3Type) => Self { base: "uvec3".to_string(), size: 0 },
             (Uint, GVec4Type) => Self { base: "uvec4".to_string(), size: 0 },
-            (Bool, Number) => Self { base: "bint".to_string(), size: 0 },
+            (Bool, Number) => Self { base: "bool".to_string(), size: 0 },
             (Bool, GVec2Type) => Self { base: "bvec2".to_string(), size: 0 },
             (Bool, GVec3Type) => Self { base: "bvec3".to_string(), size: 0 },
             (Bool, GVec4Type) => Self { base: "bvec4".to_string(), size: 0 },

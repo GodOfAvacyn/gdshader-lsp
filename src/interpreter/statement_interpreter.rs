@@ -165,9 +165,10 @@ fn evaluate_if_statement(
     let condition_range = node.condition.range();
     let condition_result = evaluate_expression(memory, *node.condition)?;
     if condition_result.type_info != TypeInfo::from_str("bool") {
+        eprintln!("this is what it was {:?}", condition_result.type_info);
         let message = "If statement condition must be a boolean expression.";
         memory.alert_error(message, condition_range);
-    }
+    } 
     let mut block_range = match *node.action {
         StatementNode::Block(ref b) => Some(b.range),
         _ => None

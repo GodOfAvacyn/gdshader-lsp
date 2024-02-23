@@ -1,10 +1,12 @@
 {
     "name": "gdshader-lsp",
-    "version": "1.0.3",
-    "description": "Language server for the GDShader language.",
+    "version": "1.0.7",
+    "description": "Language server for the Godot Shading language.",
     "icon": "icon.png",
     "readme": "README.md",
     "publisher": "godofavacyn",
+    "categories": ["Programming Languages"],
+    "keywords": ["godot", "gdshader", "shader"],
     "author": "godofavacyn",
     "license": "ISC",
     "engines": {

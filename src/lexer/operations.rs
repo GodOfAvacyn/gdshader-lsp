@@ -28,7 +28,7 @@ impl MaybeOperator for Token {
         match self.kind {
             LeftOp | RightOp | Percent | VerticalBar | Caret | Ampersand => 
                 Some(OperationType::Int),
-            LeqOp | GeqOp | LeftAngle | RightAngle => 
+            LeqOp | GeqOp | LeftAngle | RightAngle | And | Or => 
                 Some(OperationType::Comparison),
             Plus | Dash | Star | Slash =>
                 Some(OperationType::Number),
