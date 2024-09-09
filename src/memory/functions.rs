@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-use lsp_types::Range;
 use crate::lexer::{Token, TokenKind};
+use lsp_types::Range;
+use std::collections::HashMap;
 
 use super::TypeInfo;
-
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum FunctionParamQualifier {
@@ -15,18 +14,18 @@ impl FunctionParamQualifier {
     pub fn kind(&self) -> TokenKind {
         use FunctionParamQualifier::*;
         match self {
-            In => TokenKind::In, 
-            Out => TokenKind::Out, 
-            InOut => TokenKind::InOut, 
+            In => TokenKind::In,
+            Out => TokenKind::Out,
+            InOut => TokenKind::InOut,
         }
     }
     pub fn from(token: Token) -> Self {
         use FunctionParamQualifier::*;
         match token.kind {
-            TokenKind::In => In, 
-            TokenKind::Out => Out, 
-            TokenKind::InOut => InOut, 
-            _ => unreachable!()
+            TokenKind::In => In,
+            TokenKind::Out => Out,
+            TokenKind::InOut => InOut,
+            _ => unreachable!(),
         }
     }
 }
@@ -35,7 +34,7 @@ impl FunctionParamQualifier {
 pub struct FunctionParam {
     pub name: String,
     pub ty: TypeInfo,
-    pub qualifier: Option<FunctionParamQualifier>
+    pub qualifier: Option<FunctionParamQualifier>,
 }
 
 #[derive(Clone, Debug)]
@@ -49,7 +48,7 @@ pub struct FunctionInfo {
     pub signatures: Vec<FunctionSignature>,
     pub range: Option<Range>,
     pub description: Option<String>,
-    pub is_const: bool
+    pub is_const: bool,
 }
 
 macro_rules! builtin_function {
@@ -71,8 +70,8 @@ macro_rules! builtin_function {
             ],
             range: None,
             description: Some($desc.to_string()),
-            is_const: $const 
-        }) 
+            is_const: $const
+        })
     };
     (@param $param_type:ident $param_name:ident) => {
         FunctionParam {
@@ -741,7 +740,14 @@ result is undefined."
 "Splits a floating-point number(x) into significand (in the range of [0.5, 1.0])
 and an integral exponent. For x equals zero the significand and exponent are
 both zero. For x of infinity or NaN, the results are undefined."
-        )
+        ),
+        builtin_function!(
+            step [(vec_type x, vec_type y,) -> vec_type,]
+        "x[i] < y[i] ? 0.0 : 1.0"
+        ),
+        builtin_function!(
+            step [(float x, vec_type y,) -> vec_type,]
+        "y[i] < x ? 0.0 : 1.0"
+        ),
     ])
 }
-
