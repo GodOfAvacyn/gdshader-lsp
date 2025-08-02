@@ -1,3 +1,10 @@
+## 2025 UPDATE
+---
+This project has been dead for the last year and a half - I have been finishing up grad school and did not have time to work on side projects. But now I am back at it!
+
+As it is right now, the language server is riddled with bugs. I am in the middle of a full rewrite of the project. Expect to see an update in the next week.
+
+It has also been brought to my attention that as it is right now, the VSCode extension only works for Linux, not Mac or Windows, making it useless for 90% of game developers. But that, too, is changing soon.
 ## Introduction
 ---
 Gdshader-lsp ins a language server for the Godot Shading Language that runs independently from the Godot engine. This allows you to edit gdshader files in your editor of choice. It is still a work in progress, but most of the key features of an LSP is included, including helpful error messages, hover hints, and code completion.
